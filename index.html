@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextAI Roblox Studio</title>
+  <meta
+    name="description"
+    content="A browser-based Roblox coding workspace with chat memory, version history, and update-first code drafting."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <p class="eyebrow">Roblox Builder AI</p>
+        <h1>TextAI for Luau code that remembers the whole build.</h1>
+        <p class="lede">
+          Keep your chat history, update code in-place, and track versions instead of
+          letting each new prompt wipe your last system.
+        </p>
+      </div>
+
+      <div class="sidebar-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Sessions</p>
+            <h2>Workspace chats</h2>
+          </div>
+          <button class="button button-primary" id="newSessionButton" type="button">New chat</button>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+      </div>
+
+      <div class="sidebar-panel compact-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Quick Start</p>
+            <h2>Prompt launchers</h2>
+          </div>
+        </div>
+        <div class="chip-grid" id="presetPrompts"></div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section class="hero-banner">
+        <div>
+          <p class="eyebrow">Update-first workflow</p>
+          <h2>Ask for new systems, bug fixes, or upgrades without losing the last code.</h2>
+        </div>
+        <div class="hero-stats">
+          <article class="hero-stat">
+            <span>Saved chats</span>
+            <strong id="sessionCount">0</strong>
+          </article>
+          <article class="hero-stat">
+            <span>Messages</span>
+            <strong id="messageCount">0</strong>
+          </article>
+          <article class="hero-stat">
+            <span>Code versions</span>
+            <strong id="versionCount">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <div class="main-column">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Project Memory</p>
+                <h2>What this chat is building</h2>
+              </div>
+              <p class="subtle" id="memoryUpdated">No changes yet</p>
+            </div>
+            <div class="memory-grid">
+              <label class="field">
+                <span>Game idea</span>
+                <input id="goalInput" type="text" placeholder="Example: Anime battlegrounds with quests and spinning">
+              </label>
+              <label class="field">
+                <span>Rules to keep</span>
+                <input id="constraintsInput" type="text" placeholder="Example: Keep old combat, only add combo finisher">
+              </label>
+              <label class="field field-wide">
+                <span>Important systems</span>
+                <textarea id="systemsInput" rows="3" placeholder="Combat, datastore, admin commands, inventory, NPC dialogue"></textarea>
+              </label>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Chat</p>
+                <h2>Conversation that stays with the project</h2>
+              </div>
+              <div class="toolbar">
+                <button class="button" id="seedStarterButton" type="button">Seed starter code</button>
+                <button class="button" id="clearChatButton" type="button">Clear active chat</button>
+              </div>
+            </div>
+            <div class="chat-log" id="chatLog"></div>
+            <form class="composer" id="composerForm">
+              <label class="field">
+                <span>Tell the AI what to build or update</span>
+                <textarea
+                  id="promptInput"
+                  rows="4"
+                  placeholder="Example: Upgrade the combat script with dash cooldowns and keep the current hitbox system."
+                ></textarea>
+              </label>
+              <div class="composer-actions">
+                <label class="toggle">
+                  <input id="preserveToggle" type="checkbox" checked>
+                  <span>Preserve existing code and apply an update instead of rewriting</span>
+                </label>
+                <button class="button button-primary" type="submit">Generate update</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Code Canvas</p>
+                <h2>Current Luau draft</h2>
+              </div>
+              <div class="toolbar">
+                <button class="button" id="copyCodeButton" type="button">Copy code</button>
+                <button class="button" id="saveVersionButton" type="button">Save snapshot</button>
+              </div>
+            </div>
+            <label class="field">
+              <span>Editable code</span>
+              <textarea id="codeEditor" class="code-editor" spellcheck="false"></textarea>
+            </label>
+          </article>
+        </div>
+
+        <div class="side-column">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Assistant Notes</p>
+                <h2>How updates are being applied</h2>
+              </div>
+            </div>
+            <div class="notes-stack" id="assistantNotes"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Version History</p>
+                <h2>Restore a working draft</h2>
+              </div>
+              <button class="button" id="clearStorageButton" type="button">Reset all</button>
+            </div>
+            <div class="version-list" id="versionList"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="messageTemplate">
+    <article class="message-card">
+      <div class="message-head">
+        <strong></strong>
+        <span></span>
+      </div>
+      <p></p>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
